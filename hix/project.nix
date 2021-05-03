@@ -1,11 +1,55 @@
-{ src
-, userDefaults ? {}
-, nxipkgs ? null
-, nixpkgsPin ? null
-, pkgs ? null
-, ...}@commandArgs:
+commandArgs:
 let
-  sources = import ../nix/sources.nix;
+  hixProject = {
+        options = {
+          haskellNix = lib.mkOption {
+            type = lib.types.unspecified;
+            default = null;
+          };
+          nixpkgsPin = lib.mkOption {
+            type = lib.types.str;
+            default = "nixpkgs-unstable";
+          };
+          nixpkgs = lib.mkOption {
+            type = lib.types.unspecified;
+            default = null;
+          };
+          nixpkgsArgs = lib.mkOption {
+            type = lib.types.unspecified;
+            default = null;
+          };
+          overlays = lib.mkOption {
+            type = lib.types.unspecified;
+            default = [];
+          };
+          pkgs = lib.mkOption {
+            type = lib.types.unspecified;
+            default = null;
+          };
+          project = lib.mkOption {
+            type = lib.types.unspecified;
+            default = null;
+          };
+        };
+      };
+  inherit ((lib.evalModules {
+    modules = [
+      hixProject
+      {
+        options = {
+          projectFileName = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+          };
+        };
+      }
+      (import ../modules/stack-project.nix)
+      (import ../modules/cabal-project.nix)
+      commandArgs
+    ];
+  }).config) src;
+  sources = import ../nix/sources.nix {};
+  lib = import (sources.nixpkgs-unstable + "/lib");
   commandArgs' =
     builtins.listToAttrs (
       builtins.concatMap (
@@ -23,13 +67,36 @@ let
       else import src;
   userDefaults = importDefaults (commandArgs.userDefaults or null);
   projectDefaults = importDefaults (toString (src.origSrcSubDir or src) + "/nix/hix.nix");
-  args = {
-    haskellNix = import ./.. {};
-    nixpkgs = args.haskellNix.sources.${args.nixpkgsPin};
-    inherit (args.haskellNix) nixpkgsArgs;
-    pkgs = import args.nixpkgs args.nixpkgsArgs;
-  } // defaultArgs
-    // userDefaults
-    // projectDefaults
-    // commandArgs';
-in args.pkgs.haskell-nix.hix.project commandArgs
+in (lib.evalModules {
+    modules = [
+      hixProject
+      {
+        options = {
+          projectFileName = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+          };
+        };
+      }
+      (import ../modules/stack-project.nix)
+      (import ../modules/cabal-project.nix)
+      userDefaults
+      projectDefaults
+      commandArgs
+      ({config, pkgs, ...}: {
+        haskellNix = import ./.. {};
+        nixpkgsPin = "nixpkgs-unstable";
+        nixpkgs = config.haskellNix.sources.${config.nixpkgsPin};
+        nixpkgsArgs = config.haskellNix.nixpkgsArgs // {
+          overlays = config.haskellNix.nixpkgsArgs.overlays ++ config.overlays;
+        };
+        pkgs = import config.nixpkgs config.nixpkgsArgs;
+        project = config.pkgs.haskell-nix.project [
+            hixProject
+            userDefaults
+            projectDefaults
+            commandArgs
+          ];
+      })
+    ];
+  }).config.project

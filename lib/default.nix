@@ -339,7 +339,7 @@ in {
   # The resulting config is then passed to the project function's implementation.
   evalProjectModule = projectType: m: f: f
       (lib.evalModules {
-        modules = [m] ++ [
+        modules = (if builtins.isList m then m else [m]) ++ [
           # Include ../modules/cabal-project.nix or ../modules/stack-project.nix
           (import projectType)
           # Pass the pkgs to the modules
