@@ -73,11 +73,17 @@ final: prev:
           # dependencies) and then placing them somewhere where wine+remote-iserv
           # will find them.
           remote-iserv.postInstall = pkgs.lib.optionalString pkgs.stdenv.hostPlatform.isWindows (
-            let extra-libs = [ pkgs.openssl.bin pkgs.libffi pkgs.gmp pkgs.libsodium ]; in ''
+            let extra-libs = [ pkgs.openssl.bin pkgs.libffi pkgs.gmp pkgs.libsodium pkgs.windows.mcfgthreads pkgs.buildPackages.gcc.cc ]; in ''
             for p in ${lib.concatStringsSep " "extra-libs}; do
               find "$p" -iname '*.dll' -exec cp {} $out/bin/ \;
               find "$p" -iname '*.dll.a' -exec cp {} $out/bin/ \;
             done
+            (
+            cd $out/bin
+            for l in lib*.dll; do
+              ln -s "$l" "''${l#lib}"
+            done
+            )
           '');
 
           # Apply https://github.com/haskell/cabal/pull/6055
@@ -104,7 +110,6 @@ final: prev:
           conduit.patches            = pkgs.lib.optionals pkgs.stdenv.hostPlatform.isWindows [ ({ version, revision }: if builtins.compareVersions version "1.3.1.1" < 0 then ./patches/conduit-1.3.0.2.patch else null) ];
           streaming-commons.patches  = pkgs.lib.optionals pkgs.stdenv.hostPlatform.isWindows [ ./patches/streaming-commons-0.2.0.0.patch ];
           x509-system.patches        = pkgs.lib.optionals pkgs.stdenv.hostPlatform.isWindows [ ./patches/x509-system-1.6.6.patch ];
-          file-embed-lzma.patches    = pkgs.lib.optionals pkgs.stdenv.hostPlatform.isWindows [ ./patches/file-embed-lzma-0.patch ];
 
           # Set all of these to [], as these form the
           # dependency graph of the libiserv, iserv-proxy, and iserv-remote

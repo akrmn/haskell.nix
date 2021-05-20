@@ -467,7 +467,7 @@ let
         # to symlink over dlls as needed.
         + ''
         echo "Symlink library dependencies..."
-        for libdir in $(x86_64-pc-mingw32-ghc-pkg --package-db=$packageConfDir field "*" dynamic-library-dirs --simple-output|xargs|sed 's/ /\n/g'|sort -u); do
+        for libdir in $(${stdenv.hostPlatform.config}-ghc-pkg field "*" dynamic-library-dirs --simple-output|xargs|sed 's/ /\n/g'|sort -u); do
           if [ -d "$libdir" ]; then
             find "$libdir" -iname '*.dll' -exec ln -s {} $out/bin \;
           fi
@@ -488,13 +488,15 @@ let
       lib.optionalString (configureAllComponents || keepSource) ''
         mv dist dist-tmp-dir
         mkdir -p dist/build
-        if [ -d dist-tmp-dir/build/${componentId.cname} ]; then
+        if [ -d dist-tmp-dir/build/${componentId.cname}/autogen ]; then
           mv dist-tmp-dir/build/${componentId.cname}/autogen dist/build/
-        else
+        elif [ -d dist-tmp-dir/build/autogen ]; then
           mv dist-tmp-dir/build/autogen dist/build/
         fi
         mv dist-tmp-dir/package.conf.inplace dist/
-        remove-references-to -t $out dist/build/autogen/*
+        if [ -d dist/build/autogen ]; then
+          remove-references-to -t $out dist/build/autogen/*
+        fi
         rm -rf dist-tmp-dir
       ''
     ) + (lib.optionalString (keepSource && haskellLib.isLibrary componentId) ''
