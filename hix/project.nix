@@ -1,4 +1,10 @@
-commandArgs:
+{ src
+, userDefaults ? {}
+, nxipkgs ? null
+, nixpkgsPin ? null
+, pkgs ? null
+, compiler-nix-name ? null
+, ...}@commandArgs:
 let
   hixProject = {
         options = {
@@ -32,6 +38,7 @@ let
           };
         };
       };
+  hixDefaults = { compiler-nix-name = "ghc8104"; };
   inherit ((lib.evalModules {
     modules = [
       hixProject
@@ -45,7 +52,7 @@ let
       }
       (import ../modules/stack-project.nix)
       (import ../modules/cabal-project.nix)
-      commandArgs
+      commandArgs'
     ];
   }).config) src;
   sources = import ../nix/sources.nix {};
@@ -54,7 +61,7 @@ let
     builtins.listToAttrs (
       builtins.concatMap (
         name:
-          if commandArgs.${name} == null
+          if commandArgs.${name} == null || name == "userDefaults"
             then []
             else [{ inherit name; value = commandArgs.${name}; }]
     ) (builtins.attrNames commandArgs));
@@ -80,9 +87,10 @@ in (lib.evalModules {
       }
       (import ../modules/stack-project.nix)
       (import ../modules/cabal-project.nix)
+      hixDefaults
       userDefaults
       projectDefaults
-      commandArgs
+      commandArgs'
       ({config, pkgs, ...}: {
         haskellNix = import ./.. {};
         nixpkgsPin = "nixpkgs-unstable";
@@ -93,9 +101,10 @@ in (lib.evalModules {
         pkgs = import config.nixpkgs config.nixpkgsArgs;
         project = config.pkgs.haskell-nix.project [
             hixProject
+            hixDefaults
             userDefaults
             projectDefaults
-            commandArgs
+            commandArgs'
           ];
       })
     ];
