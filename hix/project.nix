@@ -4,6 +4,7 @@
 , nixpkgsPin ? null
 , pkgs ? null
 , compiler-nix-name ? null
+, shell ? null
 , ...}@commandArgs:
 let
   hixProject = {
@@ -31,6 +32,10 @@ let
           pkgs = lib.mkOption {
             type = lib.types.unspecified;
             default = null;
+          };
+          shell = lib.mkOption {
+            type = lib.types.unspecified;
+            default = {};
           };
           project = lib.mkOption {
             type = lib.types.unspecified;
@@ -74,7 +79,7 @@ let
       else import src;
   userDefaults = importDefaults (commandArgs.userDefaults or null);
   projectDefaults = importDefaults (toString (src.origSrcSubDir or src) + "/nix/hix.nix");
-in (lib.evalModules {
+  inherit ((lib.evalModules {
     modules = [
       hixProject
       {
@@ -108,4 +113,7 @@ in (lib.evalModules {
           ];
       })
     ];
-  }).config.project
+  }).config) project shell;
+in project // {
+  shell = project.shellFor shell;
+}
