@@ -43,7 +43,7 @@ let
           };
         };
       };
-  hixDefaults = { compiler-nix-name = "ghc8104"; };
+  hixDefaults = { compiler-nix-name = lib.mkDefault "ghc8104"; };
   inherit ((lib.evalModules {
     modules = [
       hixProject
