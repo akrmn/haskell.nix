@@ -33,10 +33,6 @@ let
             type = lib.types.unspecified;
             default = null;
           };
-          shell = lib.mkOption {
-            type = lib.types.unspecified;
-            default = {};
-          };
           project = lib.mkOption {
             type = lib.types.unspecified;
             default = null;
@@ -114,6 +110,4 @@ let
       })
     ];
   }).config) project shell;
-in project // {
-  shell = project.shellFor shell;
-}
+in project

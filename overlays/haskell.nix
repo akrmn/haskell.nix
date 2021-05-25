@@ -531,7 +531,7 @@ final: prev: {
                   tools = final.buildPackages.haskell-nix.tools pkg-set.config.compiler.nix-name;
                   roots = final.haskell-nix.roots pkg-set.config.compiler.nix-name;
                   projectFunction = haskell-nix: haskell-nix.cabalProject';
-                  inherit projectModule;
+                  inherit projectModule args;
                 };
             in project);
 
@@ -648,6 +648,9 @@ final: prev: {
                   # Add inputs from the cross compilation shells
                   inputsFrom = args'.inputsFrom or [] ++ crossShells;
                 });
+
+            # Default shell
+            shell = shellFor rawProject.args.shell;
 
             # Like `.hsPkgs.${packageName}` but when compined with `getComponent` any
             # cabal configure errors are defered until the components derivation builds.
@@ -775,7 +778,7 @@ final: prev: {
                   tools = final.buildPackages.haskell-nix.tools pkg-set.config.compiler.nix-name;
                   roots = final.haskell-nix.roots pkg-set.config.compiler.nix-name;
                   projectFunction = haskell-nix: haskell-nix.stackProject';
-                  inherit projectModule;
+                  inherit projectModule args;
                 };
             in project);
 

@@ -108,5 +108,12 @@ with types;
       default = null;
       description = "Deprecated in favour of `compiler-nix-name`";
     };
+
+    # Default shell arguments
+    shell = mkOption {
+      # TODO make this a submodule
+      type = unspecified;
+      default = {};
+    };
   };
 }

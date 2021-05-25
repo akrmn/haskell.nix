@@ -136,5 +136,12 @@ in {
       type = nullOr (listOf unspecified);
       default = [];
     };
+
+    # Default shell arguments
+    shell = mkOption {
+      # TODO make this a submodule
+      type = unspecified;
+      default = {};
+    };
   };
 }
