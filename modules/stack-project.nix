@@ -2,6 +2,7 @@
 with lib;
 with types;
 {
+  _file = "haskell.nix/modules/stack-project.nix";
   options = {
     # Used by callStackToNix
     name = mkOption {

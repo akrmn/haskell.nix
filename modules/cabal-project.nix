@@ -8,6 +8,7 @@ let readIfExists = src: fileName:
           then __readFile (origSrcDir + "/${fileName}")
           else null;
 in {
+  _file = "haskell.nix/modules/cabal-project.nix";
   options = {
     # Used by callCabalProjectToNix
     name = mkOption {

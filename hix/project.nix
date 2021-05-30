@@ -51,18 +51,20 @@ let
           };
         };
       }
-      (import ../modules/stack-project.nix)
+#      (import ../modules/stack-project.nix)
       (import ../modules/cabal-project.nix)
+      projectDefaults
       commandArgs'
+      { _module.args.pkgs = {}; }
     ];
-  }).config) src;
+  }).config) name;
   sources = import ../nix/sources.nix {};
   lib = import (sources.nixpkgs-unstable + "/lib");
   commandArgs' =
     builtins.listToAttrs (
       builtins.concatMap (
         name:
-          if commandArgs.${name} == null || name == "userDefaults"
+          if commandArgs.${name} == null || name == "src" || name == "userDefaults"
             then []
             else [{ inherit name; value = commandArgs.${name}; }]
     ) (builtins.attrNames commandArgs));
@@ -106,6 +108,15 @@ let
             userDefaults
             projectDefaults
             commandArgs'
+            {
+              src =
+                if __pathExists (toString (src.origSrcSubDir or src) + "/.git")
+                  then config.pkgs.haskell-nix.haskellLib.cleanGit {
+                    inherit name;
+                    inherit src;
+                  }
+                  else src;
+            }
           ];
       })
     ];
