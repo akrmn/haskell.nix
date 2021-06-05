@@ -159,6 +159,8 @@ in {
                 ++ fromUntil "8.10.3" "8.10.5" ./patches/ghc/ghc-8.10.3-rts-make-markLiveObject-thread-safe.patch
                 ++ final.lib.optional (versionAtLeast "8.10.4" && final.targetPlatform.isWindows) ./patches/ghc/ghc-8.10-z-drive-fix.patch
                 ++ final.lib.optional (versionAtLeast "8.6.5") ./patches/ghc/ghc-8.10-windows-add-dependent-file.patch
+                ++ until              "8.10.5" ./patches/ghc/AC_PROG_CC_99.patch
+                ++ fromUntil "9.0.1"  "9.0.2" ./patches/ghc/AC_PROG_CC_99.patch
                 ;
         in ({
             ghc844 = final.callPackage ../compiler/ghc {
@@ -756,8 +758,8 @@ in {
     # there should be no difference in the behaviour of these tools.
     # (stack projects on macOS may see a significant change in the
     # closure size of their build dependencies due to dynamic linking).
-    internal-cabal-install = final.haskell-nix.cabal-install.ghc884;
-    internal-nix-tools = final.haskell-nix.nix-tools.ghc884;
+    internal-cabal-install = final.haskell-nix.cabal-install.ghc8104;
+    internal-nix-tools = final.haskell-nix.nix-tools.ghc8104;
 
     # WARN: The `import ../. {}` will prevent
     #       any cross to work, as we will loose
