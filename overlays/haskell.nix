@@ -807,6 +807,7 @@ final: prev: {
                     };
                   };
                 }
+                (import ../modules/project.nix)
                 (import ../modules/stack-project.nix)
                 (import ../modules/cabal-project.nix)
               ] ++ projectModule';

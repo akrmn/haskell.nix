@@ -11,14 +11,6 @@ in {
   _file = "haskell.nix/modules/cabal-project.nix";
   options = {
     # Used by callCabalProjectToNix
-    name = mkOption {
-      type = nullOr str;
-      default = config.src.name or null;
-      description = "Optional name for better error messages";
-    };
-    src = mkOption {
-      type = either path package;
-    };
     compiler-nix-name = mkOption {
       type = str;
       description = "The name of the ghc compiler to use eg. \"ghc884\"";

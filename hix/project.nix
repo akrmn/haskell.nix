@@ -51,7 +51,8 @@ let
           };
         };
       }
-#      (import ../modules/stack-project.nix)
+      (import ../modules/project.nix)
+      (import ../modules/stack-project.nix)
       (import ../modules/cabal-project.nix)
       projectDefaults
       commandArgs'
@@ -88,6 +89,7 @@ let
           };
         };
       }
+      (import ../modules/project.nix)
       (import ../modules/stack-project.nix)
       (import ../modules/cabal-project.nix)
       hixDefaults

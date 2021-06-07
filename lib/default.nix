@@ -341,6 +341,7 @@ in {
       (lib.evalModules {
         modules = (if builtins.isList m then m else [m]) ++ [
           # Include ../modules/cabal-project.nix or ../modules/stack-project.nix
+          (import ../modules/project.nix)
           (import projectType)
           # Pass the pkgs to the modules
           ({ config, lib, ... }: {
