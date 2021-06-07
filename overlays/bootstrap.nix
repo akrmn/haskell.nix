@@ -160,6 +160,8 @@ in {
                 ++ final.lib.optional (versionAtLeast "8.10.4" && final.targetPlatform.isWindows) ./patches/ghc/ghc-8.10-z-drive-fix.patch
                 ++ final.lib.optional (versionAtLeast "8.6.5") ./patches/ghc/ghc-8.10-windows-add-dependent-file.patch
                 ++ fromUntil "8.10.1" "9.0"    ./patches/ghc/Cabal-unbreak-GHCJS.patch
+                ++ until              "8.10.5" ./patches/ghc/AC_PROG_CC_99.patch
+                ++ fromUntil "9.0.1"  "9.0.2" ./patches/ghc/AC_PROG_CC_99.patch
                 ;
         in ({
             ghc844 = final.callPackage ../compiler/ghc {
@@ -697,10 +699,10 @@ in {
           final.buildPackages.buildPackages.gitMinimal
           final.buildPackages.buildPackages.nix-prefetch-git ];
     in
-      final.symlinkJoin {
+      final.evalPackages.symlinkJoin {
         name = "nix-tools";
         paths = exes;
-        buildInputs = [ final.makeWrapper ];
+        buildInputs = [ final.evalPackages.makeWrapper ];
         meta.platforms = final.lib.platforms.all;
         # We wrap the -to-nix executables with the executables from `tools` (e.g. nix-prefetch-git)
         # so that consumers of `nix-tools` won't have to provide those tools.
